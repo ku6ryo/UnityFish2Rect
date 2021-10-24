@@ -1,0 +1,32 @@
+/**
+ * Currently only supports square image. The size of the source image and the result image should be the same.
+ */
+#pragma kernel CMain
+
+float Size;
+float ResultAngle;
+float CaptureAngle;
+RWTexture2D<float4> Result;
+Texture2D<float4> Texture;
+
+[numthreads(8, 8, 1)]
+void CMain (uint3 id : SV_DispatchThreadID)
+{
+    float maxR = tan(ResultAngle / 2);
+    float x = maxR * (id.x / Size * 2 - 1);
+    float y = maxR * (id.y / Size * 2 - 1);
+    float r = sqrt(x * x + y * y);
+    float ct = x / r;
+    float st = y / r;
+    float phi = atan(r);
+    float sr = phi / (CaptureAngle / 2);
+    float sx = sr * ct;
+    float sy = sr * st;
+
+    float si = (sx * Size + Size) / 2;
+    float sj = (sy * Size + Size) / 2;
+
+    int2 pos = int2(si, sj);
+
+    Result[id.xy] = Texture[pos];
+}
